@@ -1,0 +1,45 @@
+{
+  "name": "code-processing",
+  "version": "0.0.1",
+  "author": "Zvonimir Sabljic",
+  "license": "ISC",
+  "description": "This repository hosts the 'code-processing' npm package, which contains a set of code processing methods for generating tests.",
+  "main": "src/index.js",
+  "scripts": {
+
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Pythagora-io/js-code-processing.git"
+  },
+  "bugs": {
+    "url": "https://github.com/Pythagora-io/js-code-processing/issues"
+  },
+  "homepage": "https://github.com/Pythagora-io/js-code-processing#readme",
+  "keywords": [
+    "test",
+    "testing",
+    "automation",
+    "automated testing",
+    "unit",
+    "unit testing",
+    "GPT",
+    "integration",
+    "integration testing",
+    "mock",
+    "api",
+    "http",
+    "MERN",
+    "MEAN",
+    "mongoose",
+    "mongodb",
+    "redis",
+    "express"
+  ],
+  "dependencies": {
+    "@babel/generator": "^7.22.9",
+    "@babel/parser": "^7.22.7",
+    "@babel/traverse": "^7.22.8",
+    "lodash": "^4.17.21"
+  }
+}
