@@ -5,9 +5,7 @@
   "license": "ISC",
   "description": "This repository hosts the 'code-processing' npm package, which contains a set of code processing methods for generating tests.",
   "main": "src/index.js",
-  "scripts": {
-
-  },
+  "scripts": {},
   "repository": {
     "type": "git",
     "url": "git+https://github.com/Pythagora-io/js-code-processing.git"
@@ -40,6 +38,7 @@
     "@babel/generator": "^7.22.9",
     "@babel/parser": "^7.22.7",
     "@babel/traverse": "^7.22.8",
+    "axios": "^1.4.0",
     "lodash": "^4.17.21"
   }
 }
