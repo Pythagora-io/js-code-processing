@@ -1,33 +1,23 @@
 const _ = require('lodash');
 const axios = require('axios');
 
-const instantiationToken = Symbol();
-
 /**
  * @class Api
  * @description A class to interact with the remote API.
  * @throws Will throw an error if the class is instantiated directly.
  */
 class Api {
-  static #client;
-  #apiUrl;
-  #apiKey;
-  #apiKeyType;
+  apiUrl;
+  apiKey;
+  apiKeyType;
 
   /**
-   * @constructor
-   * @description The constructor is private to implement the singleton design pattern.
    * @param {string} apiUrl - The API base url.
    * @param {string} apiKey - The API key.
    * @param {string} apiKeyType - The type of the API key. It should be 'openai' or 'pythagora'.
-   * @param {symbol} token - A special symbol used to prevent direct class instantiation.
    * @throws Will throw an error if called directly.
    */
-  constructor(apiUrl, apiKey, apiKeyType, token) {
-    if (token !== instantiationToken) {
-      throw new Error('PrivateConstructor is not constructable. Use Api.make().');
-    }
-
+  constructor(apiUrl, apiKey, apiKeyType) {
     if (!apiUrl || !apiKey) {
       throw new Error('Pass API url and API key');
     }
@@ -36,33 +26,17 @@ class Api {
       throw new Error('API key type value must be openai or pythagora');
     }
 
-    this.#apiUrl = apiUrl;
-    this.#apiKey = apiKey;
-    this.#apiKeyType = apiKeyType;
-  }
-  
-  /**
-   * @method make
-   * @description Static method used to create an instance of the Api class.
-   * @param {string} apiUrl - The API base url.
-   * @param {string} apiKey - The API key.
-   * @param {string} apiKeyType - The type of the API key. It should be 'openai' or 'pythagora'.
-   * @returns {Api} An instance of the Api class.
-   */
-  static make(apiUrl, apiKey, apiKeyType) {
-    if (!Api.#client) {
-      Api.#client = new Api(apiUrl, apiKey, apiKeyType, instantiationToken)
-    }
-
-    return Api.#client;
+    this.apiUrl = apiUrl;
+    this.apiKey = apiKey;
+    this.apiKeyType = apiKeyType;
   }
 
   /**
    * Prepare and set the options for the API request
    */
   setOptions({path, method, headers}) {
-    const parsedUrl = new URL(this.#apiUrl);
-    let options = {
+    const parsedUrl = new URL(this.apiUrl);
+    const options = {
       protocol: parsedUrl.protocol.replace(':', ''),
       hostname: parsedUrl.hostname,
       port: parsedUrl.port,
@@ -70,8 +44,8 @@ class Api {
       method: method || 'POST',
       headers: headers || {
         'Content-Type': 'application/json',
-        'apikey': this.#apiKey,
-        'apikeytype': this.#apiKeyType
+        'apikey': this.apiKey,
+        'apikeytype': this.apiKeyType
       },
     };
 
@@ -126,10 +100,10 @@ class Api {
   }
 
   async getUnitTests(data, customLogFunction) {
-    const options = setOptions({path: '/api/generate-unit-tests'});
+    const options = this.setOptions({path: '/api/generate-unit-tests'});
     let tests, error;
     try {
-      tests = await makeRequest(JSON.stringify(data), options, customLogFunction);
+      tests = await this.makeRequest(JSON.stringify(data), options, customLogFunction);
     } catch (e) {
       error = e;
     } finally {
@@ -138,10 +112,10 @@ class Api {
   }
 
   async expandUnitTests(data, customLogFunction) {
-    const options = setOptions({path: '/api/expand-unit-tests'});
+    const options = this.setOptions({path: '/api/expand-unit-tests'});
     let tests, error;
     try {
-      tests = await makeRequest(JSON.stringify(data), options, customLogFunction);
+      tests = await this.makeRequest(JSON.stringify(data), options, customLogFunction);
     } catch (e) {
       error = e;
     } finally {
@@ -150,24 +124,24 @@ class Api {
   }
 
   async getJestAuthFunction(loginMongoQueriesArray, loginRequestBody, loginEndpointPath) {
-    const options = setOptions({path: '/api/generate-jest-auth'});
-    return makeRequest(JSON.stringify({loginMongoQueriesArray, loginRequestBody, loginEndpointPath}), options);
+    const options = this.setOptions({path: '/api/generate-jest-auth'});
+    return this.makeRequest(JSON.stringify({loginMongoQueriesArray, loginRequestBody, loginEndpointPath}), options);
   }
 
   /**
    * Generate jest test
    */
   async getJestTest(test) {
-    const options = setOptions({path: '/api/generate-jest-test'});
-    return makeRequest(JSON.stringify(test), options);
+    const options = this.setOptions({path: '/api/generate-jest-test'});
+    return this.makeRequest(JSON.stringify(test), options);
   }
 
   /**
    * Generate jest test name
    */
   async getJestTestName(test, usedNames) {
-    const options = setOptions({path: '/api/generate-jest-test-name'});
-    return makeRequest(JSON.stringify({test}), options);
+    const options = this.setOptions({path: '/api/generate-jest-test-name'});
+    return this.makeRequest(JSON.stringify({test}), options);
   }
 
   /**
@@ -175,7 +149,7 @@ class Api {
    */
   async isEligibleForExport(test) {
     try {
-      const options = setOptions({path: '/api/check-if-eligible'});
+      const options = this.setOptions({path: '/api/check-if-eligible'});
 
       const response = await axios.post(
         `${options.protocol}://${options.hostname}${options.port ? ':' + options.port : ''}${options.path}`,

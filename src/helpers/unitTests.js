@@ -26,26 +26,6 @@ class UnitTests extends UnitTestsCommon {
     this.screen = screen;
     this.spinner = spinner;
     this.scrollableContent = scrollableContent;
-
-    // this.rootPath = pythagoraRoot;
-    // this.queriedPath = path.resolve(pathToProcess);
-    // this.funcName = funcName;
-    // this.force = force;
-
-    // this.filesToProcess = [];
-    // this.processedFiles = [];
-
-    // this.functionList = {};
-    // this.this.folderStructureTree = [];
-
-    // this.ignoreFolders = ["node_modules", "pythagora_tests", "__tests__"];
-    // this.ignoreFilesEndingWith = [".test.js", ".test.ts", ".test.tsx"];
-    // this.processExtensions = [".js", ".ts", ".tsx"];
-    // this.ignoreErrors = ["BABEL_PARSER_SYNTAX_ERROR"];
-
-    // this.isFileToIgnore = (fileName) => {
-    //   return this.ignoreFilesEndingWith.some(ending => fileName.endsWith(ending))
-    // }
   }
 
   async createTests(filePath, funcToTest) {
