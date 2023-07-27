@@ -7,8 +7,8 @@ const {
     stripUnrelatedFunctions,
     processAst,
     getModuleTypeFromFilePath
-} = require("./code");
-const { getRelativePath } = require("./files");
+} = require("./utils/code");
+const { getRelativePath } = require("./utils/files");
 
 module.exports = {
     getRelativePath,
