@@ -1,23 +1,19 @@
-const {
-    replaceRequirePaths,
-    getAstFromFilePath,
-    collectTopRequires,
-    insideFunctionOrMethod,
-    getRelatedFunctions,
-    stripUnrelatedFunctions,
-    processAst,
-    getModuleTypeFromFilePath
-} = require("./utils/code");
-const { getRelativePath } = require("./utils/files");
+const UnitTests = require("./helpers/unitTests");
+const API = require("./helpers/apiClass");
 
 module.exports = {
-    getRelativePath,
-    replaceRequirePaths,
-    getAstFromFilePath,
-    collectTopRequires,
-    insideFunctionOrMethod,
-    getRelatedFunctions,
-    stripUnrelatedFunctions,
-    processAst,
-    getModuleTypeFromFilePath
-}
+  UnitTests,
+  API,
+};
+
+// USAGE EXAMPLE:
+// const Api = new API(<API ENDPOINT URL>, <PYTHAGORA API KEY>, "pythagora");
+// const unitTests = new UnitTests(
+//     {
+//         pathToProcess: <FILE OR FOLDER PATH TO PROCESS>
+//         pythagoraRoot: <PYTHAGORA ROOT PATH>,
+//     },
+//     Api,
+//     {}
+// );
+// unitTests.runProcessing();

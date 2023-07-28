@@ -1,6 +1,7 @@
 const fs = require("fs");
 const path = require("path");
-const _ = require('lodash');
+const _ = require("lodash");
+const generator = require("@babel/generator").default;
 
 const {
   getFolderTreeItem,
@@ -24,12 +25,11 @@ class UnitTestsCommon {
 
     this.filesToProcess = [];
     this.processedFiles = [];
-    this.testsGenerated = [],
-
+    this.testsGenerated = [];
     this.functionList = {};
     this.folderStructureTree = [];
-
-    this.ignoreFolders = ["node_modules", "pythagora_tests", "__tests__"];
+    (this.errors = []),
+      (this.ignoreFolders = ["node_modules", "pythagora_tests", "__tests__"]);
     this.ignoreFilesEndingWith = [".test.js", ".test.ts", ".test.tsx"];
     this.processExtensions = [".js", ".ts", ".tsx"];
     this.ignoreErrors = ["BABEL_PARSER_SYNTAX_ERROR"];
@@ -97,17 +97,15 @@ class UnitTestsCommon {
     } else {
       if (!this.processExtensions.includes(path.extname(absolutePath))) return;
 
-      if (onlyCollectFunctionData) {
-        if (isPathInside(path.dirname(this.queriedPath), absolutePath)) {
-          this.updateFolderTree(absolutePath);
-        }
-        await processFile(absolutePath, this.filesToProcess);
+      if (isPathInside(path.dirname(this.queriedPath), absolutePath)) {
+        this.updateFolderTree(absolutePath);
       }
+      await this.processFile(absolutePath, this.filesToProcess);
     }
 
     while (this.filesToProcess.length > 0) {
       const nextFile = this.filesToProcess.shift();
-      if (processedFiles.includes(nextFile)) {
+      if (this.processedFiles.includes(nextFile)) {
         continue; // Skip processing if it has already been processed
       }
       await this.traverseDirectory(nextFile);
@@ -224,7 +222,8 @@ class UnitTestsCommon {
           funcName: f.funcName,
         });
       }
-    } catch (e) {
+    } catch (err) {
+      throw err;
       // writeLine(`Error parsing file ${filePath}: ${e}`);
     }
   }
