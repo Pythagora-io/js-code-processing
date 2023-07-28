@@ -22,10 +22,6 @@ class UnitTests extends UnitTestsCommon {
   constructor(mainArgs, API, opts = {}) {
     super(mainArgs);
 
-    // this.opts.isSaveTests = isSaveTests;
-    // this.opts.screen = screen;
-    // this.opts.spinner = spinner;
-    // this.opts.scrollableContent = scrollableContent;
     this.API = API;
     this.opts = { ...opts };
   }
