@@ -26,10 +26,11 @@ class UnitTestsCommon {
     this.filesToProcess = [];
     this.processedFiles = [];
     this.testsGenerated = [];
+    this.skippedFiles = [];
     this.functionList = {};
     this.folderStructureTree = [];
-    (this.errors = []),
-      (this.ignoreFolders = ["node_modules", "pythagora_tests", "__tests__"]);
+    this.errors = [];
+    this.ignoreFolders = ["node_modules", "pythagora_tests", "__tests__"];
     this.ignoreFilesEndingWith = [".test.js", ".test.ts", ".test.tsx"];
     this.processExtensions = [".js", ".ts", ".tsx"];
     this.ignoreErrors = ["BABEL_PARSER_SYNTAX_ERROR"];

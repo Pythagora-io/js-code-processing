@@ -90,8 +90,8 @@ class UnitTests extends UnitTestsCommon {
           `/${funcData.functionName}.test${extension}`
         );
 
-        if (fs.existsSync(testFilePath) && !force) {
-          skippedFiles.push(testFilePath);
+        if (fs.existsSync(testFilePath) && !this.force) {
+          this.skippedFiles.push(testFilePath);
 
           if (this.opts.spinner) {
             await this.opts.spinner.stop();
@@ -122,14 +122,21 @@ class UnitTests extends UnitTestsCommon {
         );
 
         if (tests) {
+          const testGenerated = {
+            functionName: formattedData.functionName,
+            testCode: tests
+          };
+
           if (this.opts.isSaveTests) {
             let testPath = await this.saveTests(
               filePath,
               funcData.functionName,
               tests
             );
-            this.testsGenerated.push(testPath);
+            testGenerated.testPath = testPath;
           }
+
+          this.testsGenerated.push(testGenerated);
 
           if (this.opts.spinner) {
             await this.opts.spinner.stop();
@@ -297,6 +304,12 @@ class UnitTests extends UnitTestsCommon {
     await this.traverseAllDirectories();
     await this.traverseDirectoryUnit(this.queriedPath, this.funcName);
     console.log("Processing finished successfully!");
+    
+    return {
+      errors: this.errors,
+      skippedFiles: this.skippedFiles,
+      testsGenerated: this.testsGenerated
+    }
   }
 }
 
