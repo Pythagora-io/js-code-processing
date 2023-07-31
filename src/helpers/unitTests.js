@@ -246,7 +246,7 @@ class UnitTests extends UnitTestsCommon {
     this.processedFiles.push(file);
 
     if ((await checkPathType(file)) === "file") {
-      if (!this.processExtensions.includes(path.extname(file))) {
+      if (!UnitTestsCommon.processExtensions.includes(path.extname(file))) {
         throw new Error("File extension is not supported");
       }
       return await this.createTests(file, funcName);
@@ -259,7 +259,7 @@ class UnitTests extends UnitTestsCommon {
 
     if (stat.isDirectory()) {
       if (
-        this.ignoreFolders.includes(path.basename(absolutePath)) ||
+        UnitTestsCommon.ignoreFolders.includes(path.basename(absolutePath)) ||
         path.basename(absolutePath).charAt(0) === "."
       )
         return;
@@ -272,20 +272,20 @@ class UnitTests extends UnitTestsCommon {
           if (fileStat.isDirectory()) {
             const baseName = path.basename(absoluteFilePath);
             return (
-              !this.ignoreFolders.includes(baseName) &&
+              !UnitTestsCommon.ignoreFolders.includes(baseName) &&
               !baseName.startsWith(".")
             );
           } else {
             const ext = path.extname(f);
             return (
-              this.processExtensions.includes(ext) && !this.isFileToIgnore(f)
+              UnitTestsCommon.processExtensions.includes(ext) && !this.isFileToIgnore(f)
             );
           }
         })
         .map((f) => path.join(absolutePath, f));
       this.filesToProcess.push(...directoryFiles);
     } else {
-      if (!this.processExtensions.includes(path.extname(absolutePath))) return;
+      if (!UnitTestsCommon.processExtensions.includes(path.extname(absolutePath))) return;
 
       await this.createTests(absolutePath, funcName);
     }
@@ -302,7 +302,6 @@ class UnitTests extends UnitTestsCommon {
   async runProcessing() {
     await this.traverseAllDirectories();
     await this.traverseDirectoryUnit(this.queriedPath, this.funcName);
-    console.log("Processing finished successfully!");
 
     return {
       errors: this.errors,

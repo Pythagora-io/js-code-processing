@@ -17,7 +17,7 @@ const {
 } = require("../utils/code");
 
 class UnitTestsCommon {
-  static ignoreFolders = ["node_modules", "pythagora_tests", "__tests__"];
+  static ignoreFolders = ["node_modules", "pythagora_tests"];
   static ignoreFilesEndingWith = [".test.js", ".test.ts", ".test.tsx"];
   static processExtensions = [".js", ".ts", ".tsx"];
   static ignoreErrors = ["BABEL_PARSER_SYNTAX_ERROR"];

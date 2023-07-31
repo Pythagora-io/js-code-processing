@@ -1,4 +1,5 @@
 const UnitTests = require("./helpers/unitTests");
+const UnitTestsExpand = require("./helpers/unitTestsExpand");
 const API = require("./helpers/apiClass");
 const codeUtils = require("./utils/code");
 const filesUtils = require("./utils/files");
@@ -13,6 +14,7 @@ module.exports = {
   colors,
   common,
   UnitTests,
+  UnitTestsExpand,
   API
 }
 
