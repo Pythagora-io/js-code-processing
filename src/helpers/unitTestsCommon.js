@@ -17,7 +17,12 @@ const {
 } = require("../utils/code");
 
 class UnitTestsCommon {
-  constructor({ pathToProcess, pythagoraRoot, funcName, force }) {
+  static ignoreFolders = ["node_modules", "pythagora_tests", "__tests__"];
+  static ignoreFilesEndingWith = [".test.js", ".test.ts", ".test.tsx"];
+  static processExtensions = [".js", ".ts", ".tsx"];
+  static ignoreErrors = ["BABEL_PARSER_SYNTAX_ERROR"];
+
+  constructor({pathToProcess, pythagoraRoot, funcName, force}) {
     this.rootPath = pythagoraRoot;
     this.queriedPath = path.resolve(pathToProcess);
     this.funcName = funcName;
@@ -30,13 +35,10 @@ class UnitTestsCommon {
     this.functionList = {};
     this.folderStructureTree = [];
     this.errors = [];
-    this.ignoreFolders = ["node_modules", "pythagora_tests", "__tests__"];
-    this.ignoreFilesEndingWith = [".test.js", ".test.ts", ".test.tsx"];
-    this.processExtensions = [".js", ".ts", ".tsx"];
-    this.ignoreErrors = ["BABEL_PARSER_SYNTAX_ERROR"];
+
 
     this.isFileToIgnore = (fileName) => {
-      return this.ignoreFilesEndingWith.some((ending) =>
+      return UnitTestsCommon.ignoreFilesEndingWith.some((ending) =>
         fileName.endsWith(ending)
       );
     };
@@ -66,7 +68,7 @@ class UnitTestsCommon {
 
     if (stat.isDirectory()) {
       if (
-        this.ignoreFolders.includes(path.basename(absolutePath)) ||
+        UnitTestsCommon.ignoreFolders.includes(path.basename(absolutePath)) ||
         path.basename(absolutePath).charAt(0) === "."
       )
         return;
@@ -83,20 +85,20 @@ class UnitTestsCommon {
           if (fileStat.isDirectory()) {
             const baseName = path.basename(absoluteFilePath);
             return (
-              !this.ignoreFolders.includes(baseName) &&
+              !UnitTestsCommon.ignoreFolders.includes(baseName) &&
               !baseName.startsWith(".")
             );
           } else {
             const ext = path.extname(f);
             return (
-              this.processExtensions.includes(ext) && !this.isFileToIgnore(f)
+              UnitTestsCommon.processExtensions.includes(ext) && !this.isFileToIgnore(f)
             );
           }
         })
         .map((f) => path.join(absolutePath, f));
       this.filesToProcess.push(...directoryFiles);
     } else {
-      if (!this.processExtensions.includes(path.extname(absolutePath))) return;
+      if (!UnitTestsCommon.processExtensions.includes(path.extname(absolutePath))) return;
 
       if (isPathInside(path.dirname(this.queriedPath), absolutePath)) {
         this.updateFolderTree(absolutePath);

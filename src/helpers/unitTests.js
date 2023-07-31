@@ -2,7 +2,7 @@ const fs = require("fs");
 const path = require("path");
 const _ = require("lodash");
 
-const { checkDirectoryExists } = require("../utils/common");
+const {checkDirectoryExists} = require("../utils/common");
 const {
   stripUnrelatedFunctions,
   replaceRequirePaths,
@@ -14,7 +14,7 @@ const {
   getTestFolderPath,
   checkPathType,
 } = require("../utils/files");
-const { green, red, bold, reset } = require("../const/colors");
+const {green, red, bold, reset} = require("../const/colors");
 
 const UnitTestsCommon = require("./unitTestsCommon");
 
@@ -23,7 +23,7 @@ class UnitTests extends UnitTestsCommon {
     super(mainArgs);
 
     this.API = API;
-    this.opts = { ...opts };
+    this.opts = {...opts};
   }
 
   async createTests(filePath, funcToTest) {
@@ -109,7 +109,7 @@ class UnitTests extends UnitTestsCommon {
           getTestFolderPath(filePath, this.rootPath)
         );
 
-        let { tests, error } = await this.API.getUnitTests(
+        let {tests, error} = await this.API.getUnitTests(
           formattedData,
           (content) => {
             if (this.opts.scrollableContent) {
@@ -149,7 +149,7 @@ class UnitTests extends UnitTestsCommon {
           this.errors.push({
             file: filePath,
             function: funcData.functionName,
-            error: { stack: error.stack, message: error.message },
+            error: {stack: error.stack, message: error.message},
           });
 
           if (this.opts.spinner) {
@@ -162,12 +162,11 @@ class UnitTests extends UnitTestsCommon {
       }
 
       if (uniqueFoundFunctions.length > 0) {
-        this.folderStructureTree[fileIndex].line = `${green + bold}${
-          this.folderStructureTree[fileIndex].line
-        }${reset}`;
+        this.folderStructureTree[fileIndex].line = `${green + bold}${this.folderStructureTree[fileIndex].line
+          }${reset}`;
       }
     } catch (e) {
-      if (!this.ignoreErrors.includes(e.code)) this.errors.push(e.stack);
+      if (!UnitTestsCommon.ignoreErrors.includes(e.code)) this.errors.push(e.stack);
     }
   }
 
@@ -190,7 +189,7 @@ class UnitTests extends UnitTestsCommon {
           file.functionNames
         );
       } else {
-        let fileName = getRelativePath(file.fileName, path.dirname(filePath));
+        const fileName = getRelativePath(file.fileName, path.dirname(filePath));
         let code = await stripUnrelatedFunctions(
           file.fileName,
           file.functionNames
@@ -232,7 +231,7 @@ class UnitTests extends UnitTestsCommon {
     let extension = path.extname(filePath);
 
     if (!(await checkDirectoryExists(dir))) {
-      fs.mkdirSync(dir, { recursive: true });
+      fs.mkdirSync(dir, {recursive: true});
     }
 
     let testPath = path.join(dir, `/${name}.test${extension}`);
@@ -304,7 +303,7 @@ class UnitTests extends UnitTestsCommon {
     await this.traverseAllDirectories();
     await this.traverseDirectoryUnit(this.queriedPath, this.funcName);
     console.log("Processing finished successfully!");
-    
+
     return {
       errors: this.errors,
       skippedFiles: this.skippedFiles,
