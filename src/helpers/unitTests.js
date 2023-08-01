@@ -2,19 +2,19 @@ const fs = require("fs");
 const path = require("path");
 const _ = require("lodash");
 
-const {checkDirectoryExists} = require("../utils/common");
+const { checkDirectoryExists } = require("../utils/common");
 const {
   stripUnrelatedFunctions,
   replaceRequirePaths,
   getAstFromFilePath,
-  processAst,
+  processAst
 } = require("../utils/code");
 const {
   getRelativePath,
   getTestFolderPath,
-  checkPathType,
+  checkPathType
 } = require("../utils/files");
-const {green, red, bold, reset} = require("../const/colors");
+const { green, red, bold, reset } = require("../const/colors");
 
 const UnitTestsCommon = require("./unitTestsCommon");
 
@@ -23,13 +23,13 @@ class UnitTests extends UnitTestsCommon {
     super(mainArgs);
 
     this.API = API;
-    this.opts = {...opts};
+    this.opts = { ...opts };
   }
 
   async createTests(filePath, funcToTest) {
     try {
-      let extension = path.extname(filePath);
-      let ast = await getAstFromFilePath(filePath);
+      const extension = path.extname(filePath);
+      const ast = await getAstFromFilePath(filePath);
 
       const foundFunctions = [];
 
@@ -37,21 +37,22 @@ class UnitTests extends UnitTestsCommon {
         if (type === "exportFn" || type === "exportObj") return;
         if (funcToTest && funcName !== funcToTest) return;
 
-        let functionFromTheList = this.functionList[filePath + ":" + funcName];
+        const functionFromTheList = this.functionList[filePath + ":" + funcName];
         if (functionFromTheList && functionFromTheList.exported) {
           // TODO refactor since this is being set in code.js and here it's reverted
-          if (functionFromTheList.classParent)
+          if (functionFromTheList.classParent) {
             funcName = funcName.replace(
               functionFromTheList.classParent + ".",
               ""
             );
+          }
           foundFunctions.push({
             functionName: funcName,
             functionCode: functionFromTheList.code,
             relatedCode: functionFromTheList.relatedFunctions,
             classParent: functionFromTheList.classParent,
             isES6Syntax: functionFromTheList.syntaxType === "ES6",
-            exportedAsObject: functionFromTheList.exportedAsObject,
+            exportedAsObject: functionFromTheList.exportedAsObject
           });
         }
       });
@@ -72,20 +73,19 @@ class UnitTests extends UnitTestsCommon {
         (item) => item.absolutePath === filePath
       );
       for (const [i, funcData] of uniqueFoundFunctions.entries()) {
-        let indexToPush = fileIndex + 1 + i;
-        let prefix = this.folderStructureTree[fileIndex].line.split(
+        const indexToPush = fileIndex + 1 + i;
+        const prefix = this.folderStructureTree[fileIndex].line.split(
           path.basename(this.folderStructureTree[fileIndex].absolutePath)
         )[0];
 
         this.folderStructureTree.splice(indexToPush, 0, {
           line: " ".repeat(prefix.length) + "└───" + funcData.functionName,
-          absolutePath: filePath + ":" + funcData.functionName,
+          absolutePath: filePath + ":" + funcData.functionName
         });
 
-        if (this.opts.spinner)
-          this.opts.spinner.start(this.folderStructureTree, indexToPush);
+        if (this.opts.spinner) { this.opts.spinner.start(this.folderStructureTree, indexToPush); }
 
-        let testFilePath = path.join(
+        const testFilePath = path.join(
           getTestFolderPath(filePath, this.rootPath),
           `/${funcData.functionName}.test${extension}`
         );
@@ -103,13 +103,13 @@ class UnitTests extends UnitTestsCommon {
           continue;
         }
 
-        let formattedData = await this.reformatDataForPythagoraAPI(
+        const formattedData = await this.reformatDataForPythagoraAPI(
           funcData,
           filePath,
           getTestFolderPath(filePath, this.rootPath)
         );
 
-        let {tests, error} = await this.API.getUnitTests(
+        const { tests, error } = await this.API.getUnitTests(
           formattedData,
           (content) => {
             if (this.opts.scrollableContent) {
@@ -128,7 +128,7 @@ class UnitTests extends UnitTestsCommon {
           };
 
           if (this.opts.isSaveTests) {
-            let testPath = await this.saveTests(
+            const testPath = await this.saveTests(
               filePath,
               funcData.functionName,
               tests
@@ -149,11 +149,11 @@ class UnitTests extends UnitTestsCommon {
           this.errors.push({
             file: filePath,
             function: funcData.functionName,
-            error: {stack: error.stack, message: error.message},
+            error: { stack: error.stack, message: error.message }
           });
 
           if (this.opts.spinner) {
-            await spinner.stop();
+            await this.spinner.stop();
           }
           this.folderStructureTree[
             indexToPush
@@ -178,7 +178,7 @@ class UnitTests extends UnitTestsCommon {
         fileName: key,
         functionNames: value.map((item) => item.funcName),
         exportedAsObject: value[0].exportedAsObject,
-        syntaxType: value[0].syntaxType,
+        syntaxType: value[0].syntaxType
       };
     });
     let relatedCodeInSameFile = [funcData.functionName];
@@ -194,7 +194,7 @@ class UnitTests extends UnitTestsCommon {
           file.fileName,
           file.functionNames
         );
-        let fullPath =
+        const fullPath =
           filePath.substring(0, filePath.lastIndexOf("/")) + "/" + fileName;
         code = replaceRequirePaths(
           code,
@@ -207,7 +207,7 @@ class UnitTests extends UnitTestsCommon {
           functionNames: file.functionNames,
           exportedAsObject: file.exportedAsObject,
           syntaxType: file.syntaxType,
-          pathRelativeToTest: getRelativePath(fullPath, testFilePath),
+          pathRelativeToTest: getRelativePath(fullPath, testFilePath)
         });
       }
     }
@@ -227,14 +227,14 @@ class UnitTests extends UnitTestsCommon {
   }
 
   async saveTests(filePath, name, testData) {
-    let dir = getTestFolderPath(filePath, this.rootPath);
-    let extension = path.extname(filePath);
+    const dir = getTestFolderPath(filePath, this.rootPath);
+    const extension = path.extname(filePath);
 
     if (!(await checkDirectoryExists(dir))) {
-      fs.mkdirSync(dir, {recursive: true});
+      fs.mkdirSync(dir, { recursive: true });
     }
 
-    let testPath = path.join(dir, `/${name}.test${extension}`);
+    const testPath = path.join(dir, `/${name}.test${extension}`);
     fs.writeFileSync(testPath, testData);
     return testPath;
   }
@@ -261,8 +261,7 @@ class UnitTests extends UnitTestsCommon {
       if (
         UnitTestsCommon.ignoreFolders.includes(path.basename(absolutePath)) ||
         path.basename(absolutePath).charAt(0) === "."
-      )
-        return;
+      ) { return; }
 
       const directoryFiles = fs
         .readdirSync(absolutePath)
@@ -307,7 +306,7 @@ class UnitTests extends UnitTestsCommon {
       errors: this.errors,
       skippedFiles: this.skippedFiles,
       testsGenerated: this.testsGenerated
-    }
+    };
   }
 }
 

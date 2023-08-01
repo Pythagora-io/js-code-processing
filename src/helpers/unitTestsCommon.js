@@ -1,3 +1,5 @@
+/* eslint-disable space-before-function-paren */
+/* eslint-disable no-useless-catch */
 const fs = require("fs");
 const path = require("path");
 const _ = require("lodash");
@@ -6,14 +8,14 @@ const generator = require("@babel/generator").default;
 const {
   getFolderTreeItem,
   isPathInside,
-  calculateDepth,
+  calculateDepth
 } = require("../utils/files");
 
 const {
   getAstFromFilePath,
   processAst,
   getRelatedFunctions,
-  getModuleTypeFromFilePath,
+  getModuleTypeFromFilePath
 } = require("../utils/code");
 
 class UnitTestsCommon {
@@ -22,7 +24,7 @@ class UnitTestsCommon {
   static processExtensions = [".js", ".ts", ".tsx"];
   static ignoreErrors = ["BABEL_PARSER_SYNTAX_ERROR"];
 
-  constructor({pathToProcess, pythagoraRoot, funcName, force}) {
+  constructor({ pathToProcess, pythagoraRoot, funcName, force }) {
     this.rootPath = pythagoraRoot;
     this.queriedPath = path.resolve(pathToProcess);
     this.funcName = funcName;
@@ -35,7 +37,6 @@ class UnitTestsCommon {
     this.functionList = {};
     this.folderStructureTree = [];
     this.errors = [];
-
 
     this.isFileToIgnore = (fileName) => {
       return UnitTestsCommon.ignoreFilesEndingWith.some((ending) =>
@@ -70,8 +71,7 @@ class UnitTestsCommon {
       if (
         UnitTestsCommon.ignoreFolders.includes(path.basename(absolutePath)) ||
         path.basename(absolutePath).charAt(0) === "."
-      )
-        return;
+      ) { return; }
 
       if (isPathInside(path.dirname(this.queriedPath), absolutePath)) {
         this.updateFolderTree(absolutePath);
@@ -120,7 +120,7 @@ class UnitTestsCommon {
       isPathInside(this.queriedPath, absolutePath) &&
       !this.folderStructureTree.find((fst) => fst.absolutePath === absolutePath)
     ) {
-      let depth = calculateDepth(this.queriedPath, absolutePath);
+      const depth = calculateDepth(this.queriedPath, absolutePath);
       let prefix = "";
       for (let i = 1; i < depth; i++) {
         prefix += "|    ";
@@ -146,12 +146,12 @@ class UnitTestsCommon {
 
   async processFile(filePath) {
     try {
-      let exportsFn = [];
-      let exportsObj = [];
-      let functions = [];
-      let ast = await getAstFromFilePath(filePath);
-      let syntaxType = await getModuleTypeFromFilePath(ast);
-      let extension = path.extname(filePath);
+      const exportsFn = [];
+      const exportsObj = [];
+      const functions = [];
+      const ast = await getAstFromFilePath(filePath);
+      const syntaxType = await getModuleTypeFromFilePath(ast);
+      const extension = path.extname(filePath);
 
       // Analyze dependencies
       ast.program.body.forEach((node) => {
@@ -193,23 +193,23 @@ class UnitTestsCommon {
           functions.push({
             funcName,
             code: generator(path.node).code,
-            filePath: filePath,
+            filePath,
             relatedFunctions: getRelatedFunctions(
               path.node,
               ast,
               filePath,
               this.functionList
-            ),
+            )
           });
         }
       });
-      for (let f of functions) {
+      for (const f of functions) {
         // TODO refactor since this is being set in code.js and here it's reverted
-        let classParent =
+        const classParent =
           exportsFn.find((e) => new RegExp(`${e}\..*`).test(f.funcName)) ||
           exportsObj.find((e) => new RegExp(`${e}\..*`).test(f.funcName));
 
-        let isExportedAsObject =
+        const isExportedAsObject =
           exportsObj.includes(f.funcName) || exportsObj.includes(classParent);
 
         // if (classParent) f.funcName = f.funcName.replace(classParent + '.', '');
@@ -222,7 +222,7 @@ class UnitTestsCommon {
             isExportedAsObject ||
             !!classParent,
           exportedAsObject: isExportedAsObject,
-          funcName: f.funcName,
+          funcName: f.funcName
         });
       }
     } catch (err) {
