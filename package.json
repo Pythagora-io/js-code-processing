@@ -1,9 +1,9 @@
 {
-  "name": "code-processing",
+  "name": "pythagora-js-code-processing",
   "version": "0.0.1",
   "author": "Zvonimir Sabljic",
   "license": "ISC",
-  "description": "This repository hosts the 'code-processing' npm package, which contains a set of code processing methods for generating tests.",
+  "description": "This repository hosts the 'js-code-processing' npm package, which contains a set of code processing methods for generating tests.",
   "main": "src/index.js",
   "scripts": {
     "prepare": "husky install",

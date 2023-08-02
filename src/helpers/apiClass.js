@@ -1,6 +1,7 @@
 /* eslint-disable no-unsafe-finally */
 const _ = require("lodash");
 const axios = require("axios");
+const { blue, red, reset, bold } = require("../const/colors");
 
 /**
  * @class Api
@@ -19,12 +20,32 @@ class Api {
    * @throws Will throw an error if called directly.
    */
   constructor(apiUrl, apiKey, apiKeyType) {
+    if (!apiKey) {
+      console.log(`${bold + red}No API key found!${reset}`);
+      console.log("Please run:");
+      console.log(
+        `${
+          bold + blue
+        }npx pythagora --config --pythagora-api-key <YOUR_PYTHAGORA_API_KEY>${reset}`
+      );
+      console.log("or");
+      console.log(
+        `${
+          bold + blue
+        }npx pythagora --config --openai-api-key <YOUR_OPENAI_API_KEY>${reset}`
+      );
+      console.log(
+        `You can get Pythagora API key here: https://mailchi.mp/f4f4d7270a7a/api-waitlist`
+      );
+      process.exit(0);
+    }
+    
     if (!apiUrl || !apiKey) {
-      throw new Error("Pass API url and API key");
+      throw new Error("Please, pass API url!");
     }
 
     if (apiKeyType !== "openai" && apiKeyType !== "pythagora") {
-      throw new Error("API key type value must be openai or pythagora");
+      throw new Error("API key type value must be openai or pythagora!");
     }
 
     this.apiUrl = apiUrl;
