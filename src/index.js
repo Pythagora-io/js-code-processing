@@ -1,6 +1,7 @@
 const UnitTestsCommon = require("./helpers/unitTestsCommon");
 const UnitTests = require("./helpers/unitTests");
 const UnitTestsExpand = require("./helpers/unitTestsExpand");
+const UnitTestsCommon = require("./helpers/unitTestsCommon");
 const API = require("./helpers/apiClass");
 const codeUtils = require("./utils/code");
 const filesUtils = require("./utils/files");
