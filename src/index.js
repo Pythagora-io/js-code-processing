@@ -16,7 +16,7 @@ module.exports = {
   UnitTests,
   UnitTestsExpand,
   API
-}
+};
 
 // Usage example:
 // const Api = new API(<API ENDPOINT URL>, <PYTHAGORA API KEY>, <API KEY TYPE>);

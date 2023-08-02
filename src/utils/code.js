@@ -31,8 +31,7 @@ function replaceRequirePaths(code, currentPath, testFilePath) {
         modulePath = importPath;
       }
 
-      if (!modulePath.startsWith("./") && !modulePath.startsWith("../"))
-        return match;
+      if (!modulePath.startsWith("./") && !modulePath.startsWith("../")) { return match; }
 
       const absoluteRequirePath = path.resolve(currentPath, modulePath);
 
@@ -51,7 +50,6 @@ function replaceRequirePaths(code, currentPath, testFilePath) {
 
 async function getAstFromFilePath(filePath) {
   let data = await fs.readFile(filePath, "utf8");
-  let nodeTypesStack = [];
   // Remove shebang if it exists
   if (data.indexOf("#!") === 0) {
     data = "//" + data;
@@ -60,7 +58,7 @@ async function getAstFromFilePath(filePath) {
   const ast = babelParser.parse(data, {
     sourceType: "module", // Consider input as ECMAScript module
     locations: true,
-    plugins: ["jsx", "objectRestSpread", "typescript"], // Enable JSX, typescript and object rest/spread syntax
+    plugins: ["jsx", "objectRestSpread", "typescript"] // Enable JSX, typescript and object rest/spread syntax
   });
 
   return ast;
@@ -97,14 +95,14 @@ async function getModuleTypeFromFilePath(ast) {
         moduleType = "CommonJS";
         path.stop(); // Stop traversal when a CommonJS statement is found
       }
-    },
+    }
   });
 
   return moduleType;
 }
 
 function collectTopRequires(node) {
-  let requires = [];
+  const requires = [];
   babelTraverse(node, {
     VariableDeclaration(path) {
       if (
@@ -117,7 +115,7 @@ function collectTopRequires(node) {
     },
     ImportDeclaration(path) {
       requires.push(generator(path.node).code);
-    },
+    }
   });
   return requires;
 }
@@ -147,19 +145,19 @@ function getFullPathFromRequireOrImport(importPath, filePath) {
   if (
     importPath &&
     (importPath.startsWith("./") || importPath.startsWith("../"))
-  )
+  ) {
     importPath = path.resolve(
       filePath.substring(0, filePath.lastIndexOf("/")),
       importPath
     );
-  if (importPath.lastIndexOf(".js") + ".js".length !== importPath.length)
-    importPath += ".js";
+  }
+  if (importPath.lastIndexOf(".js") + ".js".length !== importPath.length) { importPath += ".js"; }
   return importPath;
 }
 
 function getRelatedFunctions(node, ast, filePath, functionList) {
-  let relatedFunctions = [];
-  let requiresFromFile = collectTopRequires(ast);
+  const relatedFunctions = [];
+  const requiresFromFile = collectTopRequires(ast);
 
   function processNodeRecursively(node) {
     if (node.type === "CallExpression") {
@@ -189,12 +187,12 @@ function getRelatedFunctions(node, ast, filePath, functionList) {
         requiredPath = getPathFromRequireOrImport(requiredPath);
         requiredPath = getFullPathFromRequireOrImport(requiredPath, filePath);
       }
-      let functionFromList = functionList[requiredPath + ":" + funcName];
+      const functionFromList = functionList[requiredPath + ":" + funcName];
       if (functionFromList) {
         relatedFunctions.push(
           _.extend(functionFromList, {
             fileName: requiredPath,
-            importPath,
+            importPath
           })
         );
       }
@@ -252,7 +250,7 @@ async function stripUnrelatedFunctions(filePath, targetFuncNames) {
 }
 
 function processAst(ast, cb) {
-  let nodeTypesStack = [];
+  const nodeTypesStack = [];
   babelTraverse(ast, {
     enter(path) {
       nodeTypesStack.push(path.node.type);
@@ -276,7 +274,7 @@ function processAst(ast, cb) {
               // module.exports.funcName = function() { ... }
               // module.exports = function() { ... }
               const loc = path.node.loc.start;
-              let funcName =
+              const funcName =
                 left.property.name || `anon_func_${loc.line}_${loc.column}`;
               return cb(funcName, path, "exportObj");
             }
@@ -307,9 +305,7 @@ function processAst(ast, cb) {
                 }
               });
             }
-          }
-          // Handle TypeScript transpiled exports
-          else if (
+          } /* Handle TypeScript transpiled exports */ else if (
             left.type === "MemberExpression" &&
             left.object.name === "exports"
           ) {
@@ -416,7 +412,7 @@ function processAst(ast, cb) {
     },
     exit(path) {
       nodeTypesStack.pop();
-    },
+    }
   });
 }
 
@@ -425,7 +421,7 @@ function getSourceCodeFromAst(ast) {
 }
 
 function collectTestRequires(node) {
-  let requires = [];
+  const requires = [];
   babelTraverse(node, {
     ImportDeclaration(path) {
       if (
@@ -435,12 +431,11 @@ function collectTestRequires(node) {
       ) {
         const requireData = {
           code: generator(path.node).code,
-          functionNames: [],
+          functionNames: []
         };
 
         _.forEach(path.node.specifiers, (s) => {
-          if (s.local && s.local.name)
-            requireData.functionNames.push(s.local.name);
+          if (s.local && s.local.name) { requireData.functionNames.push(s.local.name); }
         });
 
         requires.push(requireData);
@@ -454,7 +449,7 @@ function collectTestRequires(node) {
       ) {
         const requireData = {
           code: generator(path.node).code,
-          functionNames: [],
+          functionNames: []
         };
 
         // In case of a CommonJS require, the function name is usually the variable identifier of the parent node
@@ -468,36 +463,36 @@ function collectTestRequires(node) {
 
         requires.push(requireData);
       }
-    },
+    }
   });
   return requires;
 }
 
 function getRelatedTestImports(ast, filePath, functionList) {
-  let relatedCode = [];
-  let requiresFromFile = collectTestRequires(ast);
+  const relatedCode = [];
+  const requiresFromFile = collectTestRequires(ast);
 
-  for (let fileImport in requiresFromFile) {
+  for (const fileImport in requiresFromFile) {
     let requiredPath = getPathFromRequireOrImport(
       requiresFromFile[fileImport].code
     );
     requiredPath = getFullPathFromRequireOrImport(requiredPath, filePath);
 
     _.forEach(requiresFromFile[fileImport].functionNames, (funcName) => {
-      let functionFromList = functionList[requiredPath + ":" + funcName];
+      const functionFromList = functionList[requiredPath + ":" + funcName];
       if (functionFromList) {
         relatedCode.push(
           _.extend(functionFromList, {
-            fileName: requiredPath,
+            fileName: requiredPath
           })
         );
       }
     });
   }
 
-  for (let relCode of relatedCode) {
+  for (const relCode of relatedCode) {
     let relatedCodeImports = "";
-    for (let func of relCode.relatedFunctions) {
+    for (const func of relCode.relatedFunctions) {
       if (func.importPath) {
         relatedCodeImports += `${func.importPath}\n`;
       }
@@ -521,5 +516,5 @@ module.exports = {
   processAst,
   getModuleTypeFromFilePath,
   getSourceCodeFromAst,
-  getRelatedTestImports,
+  getRelatedTestImports
 };
