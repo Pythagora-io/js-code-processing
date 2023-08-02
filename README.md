@@ -13,7 +13,7 @@
 First install all npm dependencies
 
 ```bash
-npm install pythagora-js-code-processing
+npm install @pythagora.io/js-code-processing
 ```
 <br>
 <h1 id="connectwithus">🔗 Connect with us</h1>
