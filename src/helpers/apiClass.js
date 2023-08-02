@@ -35,11 +35,11 @@ class Api {
         }npx pythagora --config --openai-api-key <YOUR_OPENAI_API_KEY>${reset}`
       );
       console.log(
-        `You can get Pythagora API key here: https://mailchi.mp/f4f4d7270a7a/api-waitlist`
+        "You can get Pythagora API key here: https://mailchi.mp/f4f4d7270a7a/api-waitlist"
       );
       process.exit(0);
     }
-    
+
     if (!apiUrl || !apiKey) {
       throw new Error("Please, pass API url!");
     }
