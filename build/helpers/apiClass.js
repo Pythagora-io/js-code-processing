@@ -1,7 +1,8 @@
+"use strict";
+
 /* eslint-disable no-unsafe-finally */
 const _ = require("lodash");
 const axios = require("axios");
-const { blue, red, reset, bold } = require("../const/colors");
 
 /**
  * @class Api
@@ -20,34 +21,12 @@ class Api {
    * @throws Will throw an error if called directly.
    */
   constructor(apiUrl, apiKey, apiKeyType) {
-    if (!apiKey) {
-      console.log(`${bold + red}No API key found!${reset}`);
-      console.log("Please run:");
-      console.log(
-        `${
-          bold + blue
-        }npx pythagora --config --pythagora-api-key <YOUR_PYTHAGORA_API_KEY>${reset}`
-      );
-      console.log("or");
-      console.log(
-        `${
-          bold + blue
-        }npx pythagora --config --openai-api-key <YOUR_OPENAI_API_KEY>${reset}`
-      );
-      console.log(
-        "You can get Pythagora API key here: https://mailchi.mp/f4f4d7270a7a/api-waitlist"
-      );
-      process.exit(0);
-    }
-
     if (!apiUrl || !apiKey) {
-      throw new Error("Please, pass API url!");
+      throw new Error("Pass API url and API key");
     }
-
     if (apiKeyType !== "openai" && apiKeyType !== "pythagora") {
-      throw new Error("API key type value must be openai or pythagora!");
+      throw new Error("API key type value must be openai or pythagora");
     }
-
     this.#apiUrl = apiUrl;
     this.#apiKey = apiKey;
     this.#apiKeyType = apiKeyType;
@@ -56,7 +35,11 @@ class Api {
   /**
    * Prepare and set the options for the API request
    */
-  setOptions({ path, method, headers }) {
+  setOptions({
+    path,
+    method,
+    headers
+  }) {
     const parsedUrl = new URL(this.#apiUrl);
     const options = {
       protocol: parsedUrl.protocol.replace(":", ""),
@@ -70,7 +53,6 @@ class Api {
         apikeytype: this.#apiKeyType
       }
     };
-
     if (!options.port) delete options.port;
     return options;
   }
@@ -81,10 +63,9 @@ class Api {
   async makeRequest(data, options, customLogFunction) {
     let gptResponse = "";
     const httpModule = options.protocol === "http" ? require("http") : require("https");
-
     return new Promise((resolve, reject) => {
       const req = httpModule.request(_.omit(options, ["protocol"]), function (res) {
-        res.on("data", (chunk) => {
+        res.on("data", chunk => {
           try {
             const stringified = chunk.toString();
             try {
@@ -93,12 +74,10 @@ class Api {
                 gptResponse = json;
                 return;
               }
-            } catch (e) { }
-
+            } catch (e) {}
             gptResponse += stringified;
-            if (customLogFunction) customLogFunction(gptResponse);
-            else process.stdout.write(stringified);
-          } catch (e) { }
+            if (customLogFunction) customLogFunction(gptResponse);else process.stdout.write(stringified);
+          } catch (e) {}
         });
         res.on("end", async function () {
           process.stdout.write("\n");
@@ -109,52 +88,64 @@ class Api {
           return resolve(gptResponse);
         });
       });
-
-      req.on("error", (e) => {
+      req.on("error", e => {
         console.error("problem with request:" + e.message);
         reject(e);
       });
-
       req.write(data);
-
       req.end();
     });
   }
-
   async getUnitTests(data, customLogFunction) {
-    const options = this.setOptions({ path: "/api/generate-unit-tests" });
+    const options = this.setOptions({
+      path: "/api/generate-unit-tests"
+    });
     let tests, error;
     try {
       tests = await this.makeRequest(JSON.stringify(data), options, customLogFunction);
     } catch (e) {
       error = e;
     } finally {
-      return { tests, error };
+      return {
+        tests,
+        error
+      };
     }
   }
-
   async expandUnitTests(data, customLogFunction) {
-    const options = this.setOptions({ path: "/api/expand-unit-tests" });
+    const options = this.setOptions({
+      path: "/api/expand-unit-tests"
+    });
     let tests, error;
     try {
       tests = await this.makeRequest(JSON.stringify(data), options, customLogFunction);
     } catch (e) {
       error = e;
     } finally {
-      return { tests, error };
+      return {
+        tests,
+        error
+      };
     }
   }
-
   async getJestAuthFunction(loginMongoQueriesArray, loginRequestBody, loginEndpointPath) {
-    const options = this.setOptions({ path: "/api/generate-jest-auth" });
-    return this.makeRequest(JSON.stringify({ loginMongoQueriesArray, loginRequestBody, loginEndpointPath }), options);
+    const options = this.setOptions({
+      path: "/api/generate-jest-auth"
+    });
+    return this.makeRequest(JSON.stringify({
+      loginMongoQueriesArray,
+      loginRequestBody,
+      loginEndpointPath
+    }), options);
   }
 
   /**
    * Generate jest test
    */
   async getJestTest(test) {
-    const options = this.setOptions({ path: "/api/generate-jest-test" });
+    const options = this.setOptions({
+      path: "/api/generate-jest-test"
+    });
     return this.makeRequest(JSON.stringify(test), options);
   }
 
@@ -162,8 +153,12 @@ class Api {
    * Generate jest test name
    */
   async getJestTestName(test, usedNames) {
-    const options = this.setOptions({ path: "/api/generate-jest-test-name" });
-    return this.makeRequest(JSON.stringify({ test }), options);
+    const options = this.setOptions({
+      path: "/api/generate-jest-test-name"
+    });
+    return this.makeRequest(JSON.stringify({
+      test
+    }), options);
   }
 
   /**
@@ -171,14 +166,14 @@ class Api {
    */
   async isEligibleForExport(test) {
     try {
-      const options = this.setOptions({ path: "/api/check-if-eligible" });
-
-      const response = await axios.post(
-        `${options.protocol}://${options.hostname}${options.port ? ":" + options.port : ""}${options.path}`,
-        JSON.stringify({ test }),
-        { headers: options.headers }
-      );
-
+      const options = this.setOptions({
+        path: "/api/check-if-eligible"
+      });
+      const response = await axios.post(`${options.protocol}://${options.hostname}${options.port ? ":" + options.port : ""}${options.path}`, JSON.stringify({
+        test
+      }), {
+        headers: options.headers
+      });
       return response.data;
     } catch (error) {
       console.log(error);
@@ -186,5 +181,4 @@ class Api {
     }
   }
 }
-
 module.exports = Api;

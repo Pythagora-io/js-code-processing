@@ -17,21 +17,24 @@ const { green, red, reset } = require("../const/colors");
 const UnitTestsCommon = require("./unitTestsCommon");
 
 class UnitTestsExpand extends UnitTestsCommon {
-  static filesEndingWith = [".js", ".ts", ".tsx"];
+  static #filesEndingWith = [".js", ".ts", ".tsx"];
 
-  static checkForTestFilePath(filePath) {
+  static #checkForTestFilePath(filePath) {
     const pattern = /test\.(js|ts|tsx)$/;
     return pattern.test(filePath);
   }
 
+  #API;
+  #opts;
+
   constructor(mainArgs, API, opts = {}) {
     super(mainArgs);
 
-    this.API = API;
-    this.opts = { ...opts };
+    this.#API = API;
+    this.#opts = { ...opts };
   }
 
-  async saveTests(filePath, fileName, testData) {
+  async #saveTests(filePath, fileName, testData) {
     const dir = filePath.substring(0, filePath.lastIndexOf("/"));
 
     if (!await checkDirectoryExists(dir)) {
@@ -43,7 +46,7 @@ class UnitTestsExpand extends UnitTestsCommon {
     return testPath;
   }
 
-  reformatDataForPythagoraAPI(filePath, testCode, relatedCode, syntaxType) {
+  #reformatDataForPythagoraAPI(filePath, testCode, relatedCode, syntaxType) {
     const importedFiles = [];
     _.forEach(relatedCode, (f) => {
       const testPath = path.join(
@@ -81,7 +84,7 @@ class UnitTestsExpand extends UnitTestsCommon {
     };
   }
 
-  async createAdditionalTests(filePath) {
+  async #createAdditionalTests(filePath) {
     try {
       const ast = await getAstFromFilePath(filePath);
       const syntaxType = await getModuleTypeFromFilePath(ast);
@@ -99,29 +102,29 @@ class UnitTestsExpand extends UnitTestsCommon {
       );
 
       const relatedTestCode = getRelatedTestImports(ast, filePath, this.functionList);
-      const formattedData = this.reformatDataForPythagoraAPI(filePath, testCode, relatedTestCode, syntaxType);
+      const formattedData = this.#reformatDataForPythagoraAPI(filePath, testCode, relatedTestCode, syntaxType);
       const fileIndex = this.folderStructureTree.findIndex(item => item.absolutePath === filePath);
-      if (this.opts.spinner) {
-        this.opts.spinner.start(this.folderStructureTree, fileIndex);
+      if (this.#opts.spinner) {
+        this.#opts.spinner.start(this.folderStructureTree, fileIndex);
       }
 
       if (fs.existsSync(testPath) && !this.force) {
         this.skippedFiles.push(testPath);
-        if (this.opts.spinner) {
-          await this.opts.spinner.stop();
+        if (this.#opts.spinner) {
+          await this.#opts.spinner.stop();
         }
         this.folderStructureTree[fileIndex].line = `${green}${this.folderStructureTree[fileIndex].line}${reset}`;
         return;
       }
 
-      const { tests, error } = await this.API.expandUnitTests(formattedData, (content) => {
-        if (this.opts.scrollableContent) {
-          this.opts.scrollableContent.setContent(content);
-          this.opts.scrollableContent.setScrollPerc(100);
+      const { tests, error } = await this.#API.expandUnitTests(formattedData, (content) => {
+        if (this.#opts.scrollableContent) {
+          this.#opts.scrollableContent.setContent(content);
+          this.#opts.scrollableContent.setScrollPerc(100);
         }
 
-        if (this.opts.screen) {
-          this.opts.screen.render();
+        if (this.#opts.screen) {
+          this.#opts.screen.render();
         }
       });
 
@@ -132,14 +135,14 @@ class UnitTestsExpand extends UnitTestsCommon {
           testPath
         };
 
-        if (this.opts.isSaveTests) {
-          await this.saveTests(testPath, formattedData.testFileName, tests);
+        if (this.#opts.isSaveTests) {
+          await this.#saveTests(testPath, formattedData.testFileName, tests);
         }
 
         this.testsGenerated.push(testGenerated);
 
-        if (this.opts.spinner) {
-          await this.opts.spinner.stop();
+        if (this.#opts.spinner) {
+          await this.#opts.spinner.stop();
         }
         this.folderStructureTree[fileIndex].line = `${green}${this.folderStructureTree[fileIndex].line}${reset}`;
       } else if (error) {
@@ -147,8 +150,8 @@ class UnitTestsExpand extends UnitTestsCommon {
           file: filePath,
           error: { stack: error.stack, message: error.message }
         });
-        if (this.opts.spinner) {
-          await this.opts.spinner.stop();
+        if (this.#opts.spinner) {
+          await this.#opts.spinner.stop();
         }
         this.folderStructureTree[fileIndex].line = `${red}${this.folderStructureTree[fileIndex].line}${reset}`;
       }
@@ -157,11 +160,11 @@ class UnitTestsExpand extends UnitTestsCommon {
     }
   }
 
-  async traverseDirectoryUnitExpanded(directory, prefix = "") {
-    if (await checkPathType(directory) === "file" && UnitTestsExpand.checkForTestFilePath(directory)) {
+  async #traverseDirectoryUnitExpanded(directory, prefix = "") {
+    if (await checkPathType(directory) === "file" && UnitTestsExpand.#checkForTestFilePath(directory)) {
       const newPrefix = `|   ${prefix}|   `;
-      await this.createAdditionalTests(directory, newPrefix);
-    } else if (await checkPathType(directory) === "file" && !UnitTestsExpand.checkForTestFilePath(directory)) {
+      await this.#createAdditionalTests(directory, newPrefix);
+    } else if (await checkPathType(directory) === "file" && !UnitTestsExpand.#checkForTestFilePath(directory)) {
       throw new Error("Invalid test file path");
     }
 
@@ -171,19 +174,19 @@ class UnitTestsExpand extends UnitTestsCommon {
       const stat = fs.statSync(absolutePath);
       if (stat.isDirectory()) {
         if (UnitTestsCommon.ignoreFolders.includes(path.basename(absolutePath)) || path.basename(absolutePath).charAt(0) === ".") continue;
-        await this.traverseDirectoryUnitExpanded(absolutePath, prefix);
+        await this.#traverseDirectoryUnitExpanded(absolutePath, prefix);
       } else {
-        if (!UnitTestsCommon.processExtensions.includes(path.extname(absolutePath)) || !UnitTestsExpand.checkForTestFilePath(file)) continue;
-        await this.createAdditionalTests(absolutePath, prefix);
+        if (!UnitTestsCommon.processExtensions.includes(path.extname(absolutePath)) || !UnitTestsExpand.#checkForTestFilePath(file)) continue;
+        await this.#createAdditionalTests(absolutePath, prefix);
       }
     }
   }
 
   async runProcessing() {
     await this.traverseAllDirectories((fileName) =>
-      !UnitTestsExpand.filesEndingWith.some(ending => fileName.endsWith(ending))
+      !UnitTestsExpand.#filesEndingWith.some(ending => fileName.endsWith(ending))
     );
-    await this.traverseDirectoryUnitExpanded(this.queriedPath, this.funcName);
+    await this.#traverseDirectoryUnitExpanded(this.queriedPath, this.funcName);
 
     return {
       errors: this.errors,

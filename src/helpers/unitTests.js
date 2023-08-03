@@ -19,14 +19,17 @@ const { green, red, bold, reset } = require("../const/colors");
 const UnitTestsCommon = require("./unitTestsCommon");
 
 class UnitTests extends UnitTestsCommon {
+  #API;
+  #opts;
+
   constructor(mainArgs, API, opts = {}) {
     super(mainArgs);
 
-    this.API = API;
-    this.opts = { ...opts };
+    this.#API = API;
+    this.#opts = { ...opts };
   }
 
-  async createTests(filePath, funcToTest) {
+  async #createTests(filePath, funcToTest) {
     try {
       const extension = path.extname(filePath);
       const ast = await getAstFromFilePath(filePath);
@@ -83,7 +86,7 @@ class UnitTests extends UnitTestsCommon {
           absolutePath: filePath + ":" + funcData.functionName
         });
 
-        if (this.opts.spinner) { this.opts.spinner.start(this.folderStructureTree, indexToPush); }
+        if (this.#opts.spinner) { this.#opts.spinner.start(this.folderStructureTree, indexToPush); }
 
         const testFilePath = path.join(
           getTestFolderPath(filePath, this.rootPath),
@@ -93,8 +96,8 @@ class UnitTests extends UnitTestsCommon {
         if (fs.existsSync(testFilePath) && !this.force) {
           this.skippedFiles.push(testFilePath);
 
-          if (this.opts.spinner) {
-            await this.opts.spinner.stop();
+          if (this.#opts.spinner) {
+            await this.#opts.spinner.stop();
           }
 
           this.folderStructureTree[
@@ -103,21 +106,21 @@ class UnitTests extends UnitTestsCommon {
           continue;
         }
 
-        const formattedData = await this.reformatDataForPythagoraAPI(
+        const formattedData = await this.#reformatDataForPythagoraAPI(
           funcData,
           filePath,
           getTestFolderPath(filePath, this.rootPath)
         );
 
-        const { tests, error } = await this.API.getUnitTests(
+        const { tests, error } = await this.#API.getUnitTests(
           formattedData,
           (content) => {
-            if (this.opts.scrollableContent) {
-              this.opts.scrollableContent.setContent(content);
-              this.opts.scrollableContent.setScrollPerc(100);
+            if (this.#opts.scrollableContent) {
+              this.#opts.scrollableContent.setContent(content);
+              this.#opts.scrollableContent.setScrollPerc(100);
             }
 
-            if (this.opts.screen) this.opts.screen.render();
+            if (this.#opts.screen) this.#opts.screen.render();
           }
         );
 
@@ -127,8 +130,8 @@ class UnitTests extends UnitTestsCommon {
             testCode: tests
           };
 
-          if (this.opts.isSaveTests) {
-            const testPath = await this.saveTests(
+          if (this.#opts.isSaveTests) {
+            const testPath = await this.#saveTests(
               filePath,
               funcData.functionName,
               tests
@@ -138,8 +141,8 @@ class UnitTests extends UnitTestsCommon {
 
           this.testsGenerated.push(testGenerated);
 
-          if (this.opts.spinner) {
-            await this.opts.spinner.stop();
+          if (this.#opts.spinner) {
+            await this.#opts.spinner.stop();
           }
 
           this.folderStructureTree[
@@ -152,7 +155,7 @@ class UnitTests extends UnitTestsCommon {
             error: { stack: error.stack, message: error.message }
           });
 
-          if (this.opts.spinner) {
+          if (this.#opts.spinner) {
             await this.spinner.stop();
           }
           this.folderStructureTree[
@@ -170,7 +173,7 @@ class UnitTests extends UnitTestsCommon {
     }
   }
 
-  async reformatDataForPythagoraAPI(funcData, filePath, testFilePath) {
+  async #reformatDataForPythagoraAPI(funcData, filePath, testFilePath) {
     let relatedCode = _.groupBy(funcData.relatedCode, "fileName");
     // TODO add check if there are more functionNames than 1 while exportedAsObject is true - this shouldn't happen ever
     relatedCode = _.map(relatedCode, (value, key) => {
@@ -226,7 +229,7 @@ class UnitTests extends UnitTestsCommon {
     return funcData;
   }
 
-  async saveTests(filePath, name, testData) {
+  async #saveTests(filePath, name, testData) {
     const dir = getTestFolderPath(filePath, this.rootPath);
     const extension = path.extname(filePath);
 
@@ -239,7 +242,7 @@ class UnitTests extends UnitTestsCommon {
     return testPath;
   }
 
-  async traverseDirectoryUnit(file, funcName) {
+  async #traverseDirectoryUnit(file, funcName) {
     if (this.processedFiles.includes(file)) {
       return;
     }
@@ -249,7 +252,7 @@ class UnitTests extends UnitTestsCommon {
       if (!UnitTestsCommon.processExtensions.includes(path.extname(file))) {
         throw new Error("File extension is not supported");
       }
-      return await this.createTests(file, funcName);
+      return await this.#createTests(file, funcName);
     }
 
     const absolutePath = path.resolve(file);
@@ -286,7 +289,7 @@ class UnitTests extends UnitTestsCommon {
     } else {
       if (!UnitTestsCommon.processExtensions.includes(path.extname(absolutePath))) return;
 
-      await this.createTests(absolutePath, funcName);
+      await this.#createTests(absolutePath, funcName);
     }
 
     while (this.filesToProcess.length > 0) {
@@ -294,13 +297,13 @@ class UnitTests extends UnitTestsCommon {
       if (this.processedFiles.includes(nextFile)) {
         continue; // Skip processing if it has already been processed
       }
-      await this.traverseDirectoryUnit(nextFile, funcName);
+      await this.#traverseDirectoryUnit(nextFile, funcName);
     }
   }
 
   async runProcessing() {
     await this.traverseAllDirectories();
-    await this.traverseDirectoryUnit(this.queriedPath, this.funcName);
+    await this.#traverseDirectoryUnit(this.queriedPath, this.funcName);
 
     return {
       errors: this.errors,
