@@ -164,6 +164,7 @@ class UnitTestsExpand extends UnitTestsCommon {
     if (await checkPathType(directory) === "file" && UnitTestsExpand.#checkForTestFilePath(directory)) {
       const newPrefix = `|   ${prefix}|   `;
       await this.#createAdditionalTests(directory, newPrefix);
+      return;
     } else if (await checkPathType(directory) === "file" && !UnitTestsExpand.#checkForTestFilePath(directory)) {
       throw new Error("Invalid test file path");
     }
