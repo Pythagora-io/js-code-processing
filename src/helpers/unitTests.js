@@ -127,6 +127,7 @@ class UnitTests extends UnitTestsCommon {
         if (tests) {
           const testGenerated = {
             functionName: formattedData.functionName,
+            filePath,
             testCode: tests
           };
 

@@ -129,6 +129,7 @@ async function _createTests2(filePath, funcToTest) {
       if (tests) {
         const testGenerated = {
           functionName: formattedData.functionName,
+          filePath,
           testCode: tests
         };
         if (_classPrivateFieldGet(this, _opts).isSaveTests) {
