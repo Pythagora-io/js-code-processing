@@ -109,7 +109,7 @@ class UnitTests extends UnitTestsCommon {
         const formattedData = await this.#reformatDataForPythagoraAPI(
           funcData,
           filePath,
-          getTestFolderPath(filePath, this.rootPath)
+          this.#opts.isSaveTests ? getTestFolderPath(filePath, this.rootPath) : path.dirname(filePath)
         );
 
         const { tests, error } = await this.#API.getUnitTests(

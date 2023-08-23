@@ -32,7 +32,7 @@ function isPathInside(basePath, targetPath) {
 
 function getTestFolderPath(filePath, rootPath) {
   return path.join(
-    rootPath + PYTHAGORA_UNIT_DIR,
+    path.join(rootPath, PYTHAGORA_UNIT_DIR),
     path.dirname(filePath).replace(path.resolve(rootPath), ""),
     path.basename(filePath, path.extname(filePath))
   );
