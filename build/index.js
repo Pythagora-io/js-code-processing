@@ -1261,11 +1261,16 @@ class Api {
    */
   async makeRequest(data, options, customLogFunction) {
     let gptResponse = "";
+    let timeout;
     const httpModule = options.protocol === "http" ? require$$3$1 : require$$4;
     return new Promise((resolve, reject) => {
       const req = httpModule.request(_.omit(options, ["protocol"]), function (res) {
         res.on("data", chunk => {
           try {
+            clearTimeout(timeout);
+            timeout = setTimeout(() => {
+              reject(new Error("Request timeout"));
+            }, 30000);
             const stringified = chunk.toString();
             try {
               const json = JSON.parse(stringified);
@@ -1279,6 +1284,7 @@ class Api {
           } catch (e) {}
         });
         res.on("end", async function () {
+          clearTimeout(timeout);
           process.stdout.write("\n");
           if (res.statusCode >= 400) return reject(new Error(`Response status code: ${res.statusCode}. Error message: ${gptResponse}`));
           if (gptResponse.error) return reject(new Error(`Error: ${gptResponse.error.message}. Code: ${gptResponse.error.code}`));
@@ -1288,6 +1294,7 @@ class Api {
         });
       });
       req.on("error", e => {
+        clearTimeout(timeout);
         console.error("problem with request:" + e.message);
         reject(e);
       });
