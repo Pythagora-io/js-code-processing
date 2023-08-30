@@ -43,12 +43,12 @@ class UnitTests extends UnitTestsCommon {
         const functionFromTheList = this.functionList[filePath + ":" + funcName];
         if (functionFromTheList && functionFromTheList.exported) {
           // TODO refactor since this is being set in code.js and here it's reverted
-          if (functionFromTheList.classParent) {
-            funcName = funcName.replace(
-              functionFromTheList.classParent + ".",
-              ""
-            );
-          }
+          // if (functionFromTheList.classParent) {
+          //   funcName = funcName.replace(
+          //     functionFromTheList.classParent + ".",
+          //     ""
+          //   );
+          // }
           foundFunctions.push({
             functionName: funcName,
             functionCode: functionFromTheList.code,
