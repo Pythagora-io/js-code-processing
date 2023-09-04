@@ -126,6 +126,20 @@ class Api {
     });
   }
 
+  async checkApiKey() {
+    try {
+      await axios.get(this.#apiUrl + "/api/check-api-key", {
+        headers: {
+          apikey: this.#apiKey,
+          apikeytype: this.#apiKeyType
+        }
+      });
+      return true;
+    } catch {
+      return false;
+    }
+  }
+
   async getUnitTests(data, customLogFunction) {
     const options = this.setOptions({ path: "/api/generate-unit-tests" });
     let tests, error;
